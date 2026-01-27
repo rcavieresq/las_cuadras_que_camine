@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Las cuadras que caminé</title>
+<style>
+        /* --- 1. ESTILOS GENERALES --- */
+        :root {
+            --map-gold: #f0e68c;
+            --bg-color: #000000;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* --- TÍTULO RESPONSIVO --- */
+        h1 {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--map-gold);
+            text-align: center;
+            z-index: 50;
+            pointer-events: none;
+            /* Tamaño flexible: se adapta al ancho */
+            font-size: clamp(1.2rem, 4vw, 2.5rem); 
+            line-height: 1.2;
+            max-width: 90%;
+        }
+
+        /* --- 2. LANDING PAGE --- */
+        #landing-page {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 4s ease; 
+        }
+        .door-container {
+            position: relative; width: 100%; height: 100%;
+            max-width: 600px; max-height: 800px;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+        }
+        .door-img {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            transition: opacity 4.5s ease-in-out;
+        }
+        #door-closed { z-index: 2; opacity: 1; }
+        #door-open { z-index: 1; opacity: 1; }
+        .door-opening #door-closed { opacity: 0; }
+        .landing-hidden { opacity: 0; pointer-events: none; }
+
+        /* --- 3. BOTÓN Y OVERLAY CURATORIAL --- */
+        #about-btn {
+            position: absolute;
+            top: 30px;
+            right: 5%;
+            background: transparent;
+            border: 1px solid var(--map-gold);
+            color: var(--map-gold);
+            padding: 8px 16px;
+            font-family: 'Helvetica Neue', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        #about-btn:hover { background-color: var(--map-gold); color: #000; }
+
+        #curatorial-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.96); z-index: 2500;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #curatorial-overlay.active { opacity: 1; visibility: visible; }
+        .curatorial-content {
+            width: 90%; max-width: 600px; max-height: 80vh;
+            border: 1px solid #333; padding: 40px;
+            position: relative; overflow-y: auto;
+            color: #ccc; line-height: 1.6; font-weight: 300;
+            scrollbar-width: thin; scrollbar-color: var(--map-gold) #222;
+        }
+        .curatorial-content h2 {
+            color: var(--map-gold); margin-top: 0; margin-bottom: 30px;
+            letter-spacing: 3px; font-size: 1.5rem; text-align: center; text-transform: uppercase;
+        }
+        .curatorial-content p { margin-bottom: 20px; text-align: justify; }
+        .close-curatorial {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 40px; color: var(--map-gold); cursor: pointer;
+            line-height: 1; transition: transform 0.2s;
+        }
+        .close-curatorial:hover { transform: scale(1.1); color: #fff; }
+
+        /* --- 4. ESTRUCTURA DEL CARRUSEL --- */
+        .carousel-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        .carousel-track {
+            display: flex; width: 100%; height: 100%;
+            transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .nav-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: transparent; border: none; color: var(--map-gold);
+            font-size: 3rem; cursor: pointer; z-index: 200; padding: 20px;
+            opacity: 0.5; transition: opacity 0.3s, transform 0.3s; outline: none;
+        }
+        .nav-arrow:hover { opacity: 1; transform: translateY(-50%) scale(1.2); }
+        .prev-arrow { left: 20px; }
+        .next-arrow { right: 20px; }
+        .slide {
+            min-width: 100%; height: 100%; position: relative;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        /* --- 5. ESTILOS DE LOS MAPAS (CORREGIDO) --- */
+        /* Esta es la clave para que no se descuadre */
+        .map-container {
+            position: relative;
+            /* Definimos la proporción exacta del mapa */
+            aspect-ratio: 4724 / 3543;
+            
+            /* Lógica de tamaño:
+               1. Intenta ocupar el 90% del ancho.
+               2. PERO, si al ocupar ese ancho, la altura resultante es mayor que el 65% de la pantalla...
+               3. Entonces usa la altura como límite y calcula el ancho automáticamente. 
+            */
+            width: 90vw;
+            height: auto; 
+            max-height: 65vh; /* Límite de altura */
+            max-width: 1200px; /* Límite de ancho */
+            
+            margin: 0 auto; /* Centrado */
+        }
+
+        /* Aseguramos que el mapa ocupe TODO el contenedor (fill) */
+        .overlay-map {
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            z-index: 20; pointer-events: none; 
+            object-fit: fill; /* Forzamos a llenar el aspect-ratio del padre */
+        }
+
+        /* La capa de fotos también ocupa TODO el contenedor */
+        .photo-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+        
+        .photo-slot { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; transition: filter 0.3s ease; }
+        .photo-slot:hover { filter: brightness(1.2); z-index: 15; }
+        .photo-slot img {
+            width: 100%; height: 100%; object-fit: cover;
+            transform: scale(0.29) rotate(-8deg); 
+            filter: grayscale(100%) contrast(110%) brightness(0.95);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* CONFIGURACIÓN MAPA 1 */
+        #map-1 .slot-1 { clip-path: polygon(24.5% 12.3%, 41% 9.3%, 43% 36%, 25.7% 39.2%); }
+        #map-1 .slot-2 { clip-path: polygon(41.6% 9.2%, 59.6% 6%, 61.8% 32.8%, 43.6% 36%); }
+        #map-1 .slot-3 { clip-path: polygon(60.5% 5.9%, 78% 2.8%, 80.5% 29.5%, 62.7% 32.8%); }
+        #map-1 .slot-4 { clip-path: polygon(27.5% 40%, 43% 37.3%, 45% 64.4%, 20.6% 67.4%, 25.5% 39%); } 
+        #map-1 .slot-5 { clip-path: polygon(43.7% 37.2%, 62% 34%, 65.3% 60.4%, 45.6% 63.8%); } 
+        #map-1 .slot-6 { clip-path: polygon(62.7% 33.7%, 80.5% 30.6%, 84.4% 56.9%, 66% 60.3%); } 
+        #map-1 .slot-7 { clip-path: polygon(20.5% 68%, 27.3% 68%, 30% 95%, 17.2% 97.5%); } 
+        #map-1 .slot-8 { clip-path: polygon(28% 68%, 45% 65%, 47% 92%, 30.4% 95%); }
+        #map-1 .slot-9 { clip-path: polygon(45.6% 65%, 65.4% 61.5%, 68.6% 88%, 47.6% 92%); }
+        #map-1 .slot-10 { clip-path: polygon(66.3% 61.6%, 84.5% 58%, 88.5% 84.5%, 69.4% 88.1%); }
+
+        #map-1 .slot-1 img { transform-origin: 25% 16.3%; transform: scale(0.28) rotate(-7.3deg) !important; }
+        #map-1 .slot-2 img { transform-origin: 52% 9.5%; transform: scale(0.28) rotate(-7.3deg) !important; }
+        #map-1 .slot-3 img { transform-origin: 76.5% 3.5%; transform: scale(0.28) rotate(-7.3deg) !important; }
+        #map-1 .slot-4 img { transform-origin: 27% 54%; transform: scale(0.28) rotate(-5deg) !important; }
+        #map-1 .slot-5 img { transform-origin: 56% 47.8%; transform: scale(0.28) rotate(-7.3deg) !important; }
+        #map-1 .slot-6 img { transform-origin: 82% 41.5%; transform: scale(0.28) rotate(-7.3deg) !important; }
+        #map-1 .slot-7 img { transform-origin: 13% 97%; transform: scale(0.3) rotate(-2deg) !important; }
+        #map-1 .slot-8 img { transform-origin: 34% 92.6%; transform: scale(0.28) rotate(-7.3deg) !important; }
+        #map-1 .slot-9 img { transform-origin: 61% 86%; transform: scale(0.28) rotate(-7.3deg) !important; }
+        #map-1 .slot-10 img { transform-origin: 89% 79%; transform: scale(0.28) rotate(-7.9deg) !important; }
+
+        /* CONFIGURACIÓN MAPA 2 */
+        #map-2 .slot-1 { clip-path: polygon(1.2% 22.5%, 19.6% 19.5%, 22% 42.9%, 5% 45.8%); }
+        #map-2 .slot-2 { clip-path: polygon(20.1% 19.3%, 38.3% 16.7%, 40.5% 40.6%, 22.6% 43.2%); }
+        #map-2 .slot-3 { clip-path: polygon(38.8% 16.7%, 56% 14.3%, 58% 38%, 41% 40.5%); }
+        #map-2 .slot-4 { clip-path: polygon(56.8% 14.1%, 75.7% 11.4%, 77.7% 35.3%, 58.7% 38.1%); } 
+        #map-2 .slot-5 { clip-path: polygon(76.5% 11.3%, 93.5% 9.1%, 95.5% 32.6%, 78.5% 35.2%); } 
+        #map-2 .slot-6 { clip-path: polygon(5.3% 47%, 22% 44.2%, 26.4% 87%, 10.2% 93%); } 
+        #map-2 .slot-7 { clip-path: polygon(22.7% 44.1%, 40.4% 41.2%, 44.3% 81%, 27% 86.7%); } 
+        #map-2 .slot-8 { clip-path: polygon(41% 41.2%, 58% 38.7%, 61.7% 76%, 44.2% 82%); }
+        #map-2 .slot-9 { clip-path: polygon(58.5% 39%, 77.8% 36%, 80.6% 68.4%, 61.8% 75.7%); }
+        #map-2 .slot-10 { clip-path: polygon(78.5% 36.1%, 95.5% 33.6%, 98.6% 61.8%, 81.3% 68.2%); }
+
+        #map-2 .slot-1 img { transform-origin: -1% 29.7%; transform: scale(0.25) rotate(-7deg) !important; }
+        #map-2 .slot-2 img { transform-origin: 23% 24.5%; transform: scale(0.254) rotate(-6deg) !important; }
+        #map-2 .slot-3 img { transform-origin: 47% 20%; transform: scale(0.254) rotate(-6deg) !important; }
+        #map-2 .slot-4 img { transform-origin: 72% 14.9%; transform: scale(0.254) rotate(-6deg) !important; }
+        #map-2 .slot-5 img { transform-origin: 97% 10.2%; transform: scale(0.26) rotate(-6deg) !important; }
+        #map-2 .slot-6 img { transform-origin: -6% 92%; transform: scale(0.475) rotate(-7.1deg) !important; }
+        #map-2 .slot-7 img { transform-origin: 23% 77.5%; transform: scale(0.44) rotate(-6deg) !important; }
+        #map-2 .slot-8 img { transform-origin: 52.5% 66.5%; transform: scale(0.41) rotate(-6deg) !important; }
+        #map-2 .slot-9 img { transform-origin: 82% 56%; transform: scale(0.37) rotate(-6.5deg) !important; }
+        #map-2 .slot-10 img { transform-origin: 107% 47.5%; transform: scale(0.34) rotate(-6deg) !important; }
+
+        /* --- 6. VIDEO (CORREGIDO) --- */
+        .video-container {
+            position: relative;
+            /* Misma lógica que el mapa para que sean consistentes */
+            aspect-ratio: 16 / 9;
+            width: 90vw;
+            height: auto;
+            max-height: 65vh;
+            max-width: 1000px;
+            
+            border: 1px solid var(--map-gold); 
+            box-shadow: 0 0 30px rgba(240, 230, 140, 0.1);
+            background: #000;
+            display: flex; justify-content: center; align-items: center;
+            margin: 0 auto;
+        }
+        .video-container video { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.5s ease; }
+        .video-caption { position: absolute; bottom: 10%; letter-spacing: 2px; color: #999; width: 100%; text-align: center; margin: 0; }
+
+        /* --- 7. BOTÓN MEZCLAR --- */
+        .shuffle-button {
+            position: relative; margin-top: 30px; padding: 15px 35px;
+            background-color: transparent; color: var(--map-gold); border: 2px solid var(--map-gold);
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 3px; transition: all 0.3s ease; z-index: 60;
+        }
+        .shuffle-button:hover { background-color: var(--map-gold); color: #000; }
+        .hide-btn { visibility: hidden; pointer-events: none; }
+
+        /* --- 8. LIGHTBOX --- */
+        .lightbox {
+            visibility: hidden; opacity: 0; position: fixed; z-index: 3000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .lightbox.active { visibility: visible; opacity: 1; }
+        .lightbox-content {
+            max-width: 90%; max-height: 90%;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+            border: 1px solid #333; transition: opacity 0.3s ease;
+        }
+        .close-btn {
+            position: absolute; top: 20px; right: 30px;
+            font-size: 50px; color: var(--map-gold);
+            cursor: pointer; z-index: 1001;
+        }
+
+        /* --- MEDIA QUERIES (MÓVIL) --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5rem; top: 15px; }
+            
+            /* Bajamos el botón de proyecto al pie para que no tape el título */
+            #about-btn { 
+                top: auto; bottom: 20px; right: 20px; 
+                background: rgba(0,0,0,0.8); /* Fondo oscuro para que se lea */
+            }
+            
+            .nav-arrow { font-size: 2rem; padding: 10px; }
+            
+            /* Ajuste del botón Mezclar para dar espacio */
+            .shuffle-button { margin-bottom: 50px; font-size: 0.8rem; padding: 10px 20px; }
+            
+            .video-caption { bottom: -40px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <div class="door-container" id="door-trigger">
+            <img src="./img/puerta_abierta.jpg" id="door-open" class="door-img" alt="Puerta Abierta">
+            <img src="./img/puerta_cerrada.jpg" id="door-closed" class="door-img" alt="Puerta Cerrada">
+        </div>
+    </div>
+
+    <audio id="bg-audio" loop>
+        <source src="./audio/ruido_calle.mp4" type="audio/mpeg">
+        <source src="./audio/ruido_calle.mp3" type="audio/mp3">
+    </audio>
+
+    <button id="about-btn">PROYECTO</button>
+
+    <div id="curatorial-overlay">
+        <div class="curatorial-content">
+            <span class="close-curatorial">&times;</span>
+            <h2>LAS CUADRAS QUE CAMINÉ</h2>
+            <div class="text-body">
+                <p>Este proyecto ocupa un espacio en el centro de Santiago. Son cuadras sin nombre, habitadas por imágenes de recuerdos que quizás —solo quizás— pertenecieron a ese lugar.</p>
+                <p>¿Cómo nos sentiríamos si los trayectos que contienen nuestra historia desaparecieran? Surge el miedo a no recordar los lugares tantas veces transitados; una confusión que pone en duda lo real, pero que paradójicamente reafirma la sensación de haber estado ahí.</p>
+                <p>Como los recuerdos de la infancia que se transforman de tanto contarse ("¿Esa micro pasaba por acá? ¿Fue ahí donde comí esa vez?"), este <strong>atlas personal</strong> se construye mediante la superposición de mapas y fotografías que se desvanecen con el tiempo y la interacción.</p>
+                <p>La obra invita a intervenir. Un botón permite mezclar los recuerdos, pero el acto de intentar verlos mejor los desgasta inevitablemente. Con cada pulsación, comienzan a desaparecer lentamente hasta volverse una masa negra de vacío y olvido.</p>
+                <p>El olvido no es un error del sistema, sino una característica intrínseca de la memoria humana: al final, solo queda la estructura vacía del lugar donde ocurrieron las cosas.</p>
+                <div style="margin-top: 50px; border-top: 1px solid #444; padding-top: 20px; font-size: 0.85em; color: var(--map-gold); text-align: right;">
+                    <p style="margin:0; text-align: right;">Concepto y Desarrollo</p>
+                    <p style="margin:0; text-align: right; font-weight: bold; letter-spacing: 1px;">ROBERTO CAVIERES QUIÑONES</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h1>Las cuadras que caminé</h1>
+
+    <div class="carousel-container">
+        <button class="nav-arrow prev-arrow" id="prevBtn">&#10094;</button>
+        <button class="nav-arrow next-arrow" id="nextBtn">&#10095;</button>
+
+        <div class="carousel-track" id="track">
+            
+            <div class="slide active" id="slide-1" data-type="map">
+                <div class="map-container" id="map-1">
+                    <img src="./img/map1_overlay.png" alt="Mapa 1" class="overlay-map">
+                    <div class="photo-layer">
+                        <div class="photo-slot slot-1"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-2"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-3"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-4"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-5"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-6"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-7"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-8"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-9"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-10"><img class="project-photo" src=""></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" id="slide-2" data-type="map">
+                <div class="map-container" id="map-2">
+                    <img src="./img/map2_overlay.png" alt="Mapa 2" class="overlay-map"> 
+                    <div class="photo-layer">
+                        <div class="photo-slot slot-1"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-2"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-3"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-4"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-5"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-6"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-7"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-8"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-9"><img class="project-photo" src=""></div>
+                        <div class="photo-slot slot-10"><img class="project-photo" src=""></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide" id="slide-3" data-type="video">
+                <div class="video-container">
+                    <video id="project-video" controls>
+                        <source src="./video/proceso_mapa.mp4" type="video/mp4">
+                        Tu navegador no soporta video.
+                    </video>
+                </div>
+                <p class="video-caption">LA MEMORIA COMO PEATÓN</p>
+            </div>
+
+        </div> 
+    </div>
+
+    <button class="shuffle-button" id="shuffleBtn">Mezclar Recuerdos</button>
+
+    <div id="lightbox" class="lightbox">
+        <span class="close-btn">&times;</span>
+        <img class="lightbox-content" id="lightbox-img" src="">
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const INACTIVITY_LIMIT = 90000; 
+
+        // --- BASE DE DATOS DE FOTOS ---
+        const photosMap1 = [
+            './img/02042025-_MG_3926.jpg', './img/02042025-_MG_3928.jpg', './img/02042025-_MG_3937.jpg',
+            './img/02042025-_MG_3942.jpg', './img/02042025-_MG_3949.jpg', './img/02042025-_MG_3953.jpg',
+            './img/02042025-_MG_3968.jpg', './img/02042025-_MG_3969.jpg', './img/02042025-_MG_3973.jpg',
+            './img/02042025-_MG_3977.jpg', './img/02042025-_MG_3998.jpg', './img/03032025-_MG_3046.jpg',
+            './img/03032025-_MG_3055.jpg', './img/03032025-_MG_3058.jpg', './img/03032025-_MG_3059.jpg',
+            './img/03032025-_MG_3063.jpg', './img/03032025-_MG_3066.jpg', './img/03032025-_MG_3072.jpg',
+            './img/03032025-_MG_3076.jpg', './img/03032025-_MG_3086.jpg', './img/03032025-_MG_3088.jpg',
+            './img/03032025-_MG_3096.jpg', './img/03042025-_MG_4008.jpg', './img/03042025-_MG_4023.jpg',
+            './img/03042025-_MG_4024.jpg', './img/03042025-_MG_4056.jpg', './img/03042025-_MG_4064.jpg',
+            './img/03042025-_MG_4070.jpg', './img/03042025-_MG_4105.jpg', './img/03042025-_MG_4106.jpg',
+            './img/03042025-_MG_4111.jpg', './img/04042025-_MG_4143.jpg', './img/04042025-_MG_4158.jpg',
+            './img/04042025-_MG_4165.jpg', './img/04042025-_MG_4173.jpg', './img/04042025-_MG_4183.jpg',
+            './img/06082025-_MG_2010.jpg', './img/06082025-_MG_2011.jpg', './img/06082025-_MG_2013.jpg',
+            './img/06082025-_MG_2015.jpg', './img/06082025-_MG_2016.jpg', './img/06082025-_MG_2017.jpg',
+            './img/07032025-_MG_3121.jpg', './img/07032025-_MG_3133.jpg', './img/07032025-_MG_3135.jpg',
+            './img/07032025-_MG_3147.jpg', './img/07032025-_MG_3149.jpg', './img/07032025-_MG_3151.jpg',
+            './img/07032025-_MG_3158.jpg', './img/07032025-_MG_3160.jpg', './img/07032025-_MG_3167.jpg',
+            './img/07032025-_MG_3177.jpg', './img/07032025-_MG_3180.jpg', './img/07032025-_MG_3181.jpg',
+            './img/07032025-_MG_3198.jpg', './img/07032025-_MG_3202.jpg', './img/07032025-_MG_3204.jpg',
+            './img/07032025-_MG_3211.jpg', './img/07032025-_MG_3264.jpg', './img/07032025-_MG_3273.jpg',
+            './img/07032025-_MG_3276.jpg', './img/07032025-_MG_3281.jpg', './img/07032025-_MG_3292.jpg',
+            './img/07032025-_MG_3307.jpg', './img/07032025-_MG_3310.jpg', './img/07032025-_MG_3312.jpg',
+            './img/07032025-_MG_3314.jpg', './img/07032025-_MG_3318.jpg', './img/07042025-_MG_4230.jpg',
+            './img/07042025-_MG_4231.jpg', './img/07042025-_MG_4232.jpg', './img/07042025-_MG_4240.jpg',
+            './img/07042025-_MG_4246.jpg', './img/07042025-_MG_4255.jpg', './img/07042025-_MG_4263.jpg',
+            './img/07042025-_MG_4269.jpg', './img/07042025-_MG_4273.jpg', './img/07042025-_MG_4275.jpg',
+            './img/07042025-_MG_4278.jpg', './img/07042025-_MG_4281.jpg', './img/07042025-_MG_4292.jpg',
+            './img/07042025-_MG_4294.jpg', './img/07042025-_MG_4297.jpg', './img/08032025-_MG_3354.jpg',
+            './img/08032025-_MG_3358.jpg', './img/08032025-_MG_3360.jpg', './img/08032025-_MG_3373.jpg',
+            './img/08032025-_MG_3376.jpg', './img/08032025-_MG_3380.jpg', './img/08032025-_MG_3389.jpg',
+            './img/08042025-_MG_4316.jpg', './img/08042025-_MG_4330.jpg', './img/08042025-_MG_4335.jpg',
+            './img/09042025-_MG_4370.jpg', './img/09042025-_MG_4373.jpg', './img/09042025-_MG_4378.jpg',
+            './img/09042025-_MG_4381.jpg', './img/09042025-_MG_4385.jpg', './img/09042025-_MG_4387.jpg',
+            './img/09042025-_MG_4392.jpg', './img/09042025-_MG_4404.jpg', './img/09042025-_MG_4405.jpg',
+            './img/09042025-_MG_4406.jpg', './img/09042025-_MG_4408.jpg', './img/09042025-_MG_4414.jpg'
+        ];
+
+        const photosMap2 = [
+            './img/09042025-_MG_4424.jpg', './img/09042025-_MG_4433.jpg', './img/09042025-_MG_4435.jpg',
+            './img/09042025-_MG_4441.jpg', './img/12082025-_MG_2307.jpg', './img/12082025-_MG_2308.jpg',
+            './img/12082025-_MG_2310.jpg', './img/12082025-_MG_2314.jpg', './img/12082025-_MG_2321.jpg',
+            './img/12082025-_MG_2324.jpg', './img/12082025-_MG_2339.jpg', './img/12082025-_MG_2340.jpg',
+            './img/12082025-_MG_2346.jpg', './img/12082025-_MG_2355.jpg', './img/12082025-_MG_2367.jpg',
+            './img/12082025-_MG_2372.jpg', './img/12082025-_MG_2375.jpg', './img/12082025-_MG_2378.jpg',
+            './img/12082025-_MG_2382-HDR.jpg', './img/12082025-_MG_2387.jpg', './img/12082025-_MG_2399.jpg',
+            './img/12082025-_MG_2403.jpg', './img/12082025-_MG_2410.jpg', './img/12082025-_MG_2412.jpg',
+            './img/14032025-_MG_3447.jpg', './img/18012026-_MG_0900.jpg', './img/18032025-_MG_3465.jpg',
+            './img/18032025-_MG_3466.jpg', './img/18082025-_MG_2629.jpg', './img/18082025-_MG_2640.jpg',
+            './img/18082025-_MG_2645.jpg', './img/18082025-_MG_2649.jpg', './img/18082025-_MG_2664.jpg',
+            './img/18082025-_MG_2666.jpg', './img/18082025-_MG_2673.jpg', './img/18082025-_MG_2676.jpg',
+            './img/18082025-_MG_2681.jpg', './img/18082025-_MG_2690.jpg', './img/18082025-_MG_2723.jpg',
+            './img/18082025-_MG_2730.jpg', './img/18082025-_MG_2745.jpg', './img/19012026-_MG_0913.jpg',
+            './img/19012026-_MG_0924.jpg', './img/19012026-_MG_0930.jpg', './img/19012026-_MG_0943.jpg',
+            './img/19012026-_MG_0952.jpg', './img/19012026-_MG_0959.jpg', './img/19012026-_MG_0966.jpg',
+            './img/19012026-_MG_0972.jpg', './img/19012026-_MG_0977.jpg', './img/19032025-_MG_3471.jpg',
+            './img/20032025-_MG_3475.jpg', './img/20032025-_MG_3477.jpg', './img/20032025-_MG_3494.jpg',
+            './img/20032025-_MG_3500.jpg', './img/20032025-_MG_3520.jpg', './img/20032025-_MG_3526.jpg',
+            './img/20032025-_MG_3543.jpg', './img/20032025-_MG_3544.jpg', './img/20032025-_MG_3554.jpg',
+            './img/20032025-_MG_3560.jpg', './img/20032025-_MG_3561.jpg', './img/20032025-_MG_3562.jpg',
+            './img/21042025-_MG_5270.jpg', './img/21042025-_MG_5273.jpg', './img/21042025-_MG_5274.jpg',
+            './img/21042025-_MG_5285.jpg', './img/21042025-_MG_5294.jpg', './img/21042025-_MG_5311.jpg',
+            './img/21042025-_MG_5314.jpg', './img/21042025-_MG_5316.jpg', './img/21042025-_MG_5339.jpg',
+            './img/21042025-_MG_5351.jpg', './img/21042025-_MG_5353.jpg', './img/21042025-_MG_5356.jpg',
+            './img/21042025-_MG_5363.jpg', './img/21042025-_MG_5375.jpg', './img/21042025-_MG_5382.jpg',
+            './img/21042025-_MG_5388.jpg', './img/21042025-_MG_5393.jpg', './img/21042025-_MG_5394.jpg',
+            './img/21042025-_MG_5396.jpg', './img/21042025-_MG_5397.jpg', './img/22032025-_MG_3574.jpg',
+            './img/24032025-_MG_3590.jpg', './img/24032025-_MG_3597.jpg', './img/24032025-_MG_3600.jpg',
+            './img/24032025-_MG_3601.jpg', './img/24032025-_MG_3604.jpg', './img/24032025-_MG_3605.jpg',
+            './img/24032025-_MG_3613.jpg', './img/24032025-_MG_3642.jpg', './img/24032025-_MG_3651.jpg',
+            './img/24032025-_MG_3657.jpg', './img/24032025-_MG_3660.jpg', './img/24032025-_MG_3669.jpg',
+            './img/26082025-_MG_3136.jpg', './img/26082025-_MG_3158.jpg', './img/26082025-_MG_3188.jpg',
+            './img/28032025-_MG_3792.jpg', './img/28032025-_MG_3793.jpg', './img/28032025-_MG_3797.jpg',
+            './img/28032025-_MG_3800.jpg', './img/28032025-_MG_3804.jpg', './img/28032025-_MG_3805.jpg',
+            './img/28032025-_MG_3807.jpg', './img/28032025-_MG_3811.jpg', './img/28032025-_MG_3812.jpg',
+            './img/28032025-_MG_3819.jpg', './img/29032025-_MG_3862.jpg', './img/29032025-_MG_3870.jpg',
+            './img/29032025-_MG_3875.jpg', './img/29032025-_MG_3878.jpg', './img/29032025-_MG_3882.jpg',
+            './img/29032025-_MG_3883.jpg', './img/29032025-_MG_3890.jpg', './img/29032025-_MG_3896.jpg',
+            './img/29032025-_MG_3907.jpg', './img/En la peni.jpg', './img/robertocavieres01.jpg',
+            './img/robertocavieres02.jpg', './img/robertocavieres03.jpg', './img/robertocavieres04.jpg',
+            './img/robertocavieres05.jpg', './img/robertocavieres06.jpg', './img/robertocavieres07.jpg',
+            './img/robertocavieres08.jpg', './img/robertocavieres09.jpg', './img/robertocavieres10.jpg',
+            './img/robertocavieres11.jpg', './img/robertocavieres12.jpg', './img/robertocavieres13.jpg',
+            './img/robertocavieres14.jpg', './img/robertocavieres15.jpg', './img/robertocavieres16.jpg',
+            './img/robertocavieres17.jpg', './img/robertocavieres18.jpg', './img/robertocavieres19.jpg',
+            './img/robertocavieres20.jpg', './img/robertocavieres21.jpg', './img/robertocavieres22.jpg'
+        ];
+
+        // --- VARIABLES GLOBALES ---
+        const slides = document.querySelectorAll('.slide');
+        const track = document.getElementById('track'); 
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        
+        const landingPage = document.getElementById('landing-page');
+        const doorTrigger = document.getElementById('door-trigger');
+        const doorContainer = document.querySelector('.door-container');
+        const audio = document.getElementById('bg-audio');
+        const aboutBtn = document.getElementById('about-btn');
+        const curatorialOverlay = document.getElementById('curatorial-overlay');
+        const closeCuratorial = document.querySelector('.close-curatorial');
+
+        let inactivityTimer;
+        let isLandingActive = true; 
+        let audioInterval; 
+
+        let currentSlide = 0;
+        const mapState = {
+            'slide-1': { opacity: 1.0, currentPhotos: [] },
+            'slide-2': { opacity: 1.0, currentPhotos: [] }
+        };
+
+        // --- LÓGICA DEL AUDIO (FADE IN/OUT) ---
+        function fadeInAudio() {
+            clearInterval(audioInterval);
+            audio.volume = 0;
+            audio.play().catch(e => console.log("Audio autoplay prevenido"));
+            audioInterval = setInterval(() => {
+                if (audio.volume < 0.25) {
+                    audio.volume = Math.min(0.25, audio.volume + 0.01);
+                } else {
+                    clearInterval(audioInterval);
+                }
+            }, 150);
+        }
+
+        function fadeOutAudio() {
+            clearInterval(audioInterval);
+            audioInterval = setInterval(() => {
+                if (audio.volume > 0.01) {
+                    audio.volume = Math.max(0, audio.volume - 0.01);
+                } else {
+                    audio.volume = 0;
+                    audio.pause();
+                    audio.currentTime = 0;
+                    clearInterval(audioInterval);
+                }
+            }, 50);
+        }
+
+        // --- LÓGICA DEL LANDING Y LA INACTIVIDAD ---
+        doorTrigger.addEventListener('click', enterExperience);
+
+        function enterExperience() {
+            if (!isLandingActive) return;
+            doorContainer.classList.add('door-opening');
+            fadeInAudio();
+            setTimeout(() => {
+                landingPage.classList.add('landing-hidden');
+                isLandingActive = false;
+                resetInactivityTimer();
+            }, 4000); 
+        }
+
+        function exitExperience() {
+            if (isLandingActive) return;
+            isLandingActive = true;
+            landingPage.classList.remove('landing-hidden');
+            fadeOutAudio();
+            setTimeout(() => {
+                doorContainer.classList.remove('door-opening');
+            }, 1500); 
+        }
+
+        function resetInactivityTimer() {
+            if (isLandingActive) return;
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(exitExperience, INACTIVITY_LIMIT);
+        }
+
+        ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'].forEach(evt => 
+            document.addEventListener(evt, resetInactivityTimer)
+        );
+
+        // --- LÓGICA TEXTO CURATORIAL ---
+        aboutBtn.addEventListener('click', () => {
+            curatorialOverlay.classList.add('active');
+            resetInactivityTimer();
+        });
+
+        closeCuratorial.addEventListener('click', () => {
+            curatorialOverlay.classList.remove('active');
+            resetInactivityTimer();
+        });
+
+        curatorialOverlay.addEventListener('click', (e) => {
+            if (e.target === curatorialOverlay) {
+                curatorialOverlay.classList.remove('active');
+                resetInactivityTimer();
+            }
+        });
+
+        // --- LÓGICA DEL ATLAS (MAPAS) ---
+        function shuffleArray(array) {
+            let arrCopy = [...array];
+            for (let i = arrCopy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arrCopy[i], arrCopy[j]] = [arrCopy[j], arrCopy[i]];
+            }
+            return arrCopy;
+        }
+
+        function initializeAllMaps() {
+            mapState['slide-1'].currentPhotos = shuffleArray(photosMap1);
+            renderMap('slide-1');
+            mapState['slide-2'].currentPhotos = shuffleArray(photosMap2);
+            renderMap('slide-2');
+        }
+
+        function renderMap(slideId) {
+            const slide = document.getElementById(slideId);
+            if (!slide) return;
+            const slots = slide.querySelectorAll('.project-photo');
+            const photos = mapState[slideId].currentPhotos;
+            const opacity = mapState[slideId].opacity;
+            slots.forEach((img, index) => {
+                img.src = photos[index % photos.length];
+                img.style.opacity = opacity;
+            });
+        }
+
+        function shuffleCurrentMap() {
+            const activeSlide = slides[currentSlide];
+            const slideId = activeSlide.id;
+            if (activeSlide.dataset.type !== 'map') return;
+
+            let currentOp = mapState[slideId].opacity;
+            if (currentOp > 0) {
+                currentOp -= 0.15;
+                currentOp = Math.round(currentOp * 10) / 10;
+            }
+            if (currentOp < 0) currentOp = 0;
+            
+            mapState[slideId].opacity = currentOp;
+
+            let sourcePhotos = (slideId === 'slide-1') ? photosMap1 : photosMap2;
+            mapState[slideId].currentPhotos = shuffleArray(sourcePhotos);
+
+            const slots = activeSlide.querySelectorAll('.project-photo');
+            const newPhotos = mapState[slideId].currentPhotos;
+
+            slots.forEach((img, index) => {
+                img.style.opacity = 0; 
+                setTimeout(() => {
+                    img.src = newPhotos[index % newPhotos.length]; 
+                    img.style.opacity = currentOp; 
+                }, 400);
+            });
+        }
+
+        function showSlide(index) {
+            if (index >= slides.length) currentSlide = 0;
+            else if (index < 0) currentSlide = slides.length - 1;
+            else currentSlide = index;
+
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            const activeSlide = slides[currentSlide];
+            activeSlide.classList.add('active');
+
+            if (activeSlide.dataset.type === 'video') {
+                shuffleBtn.classList.add('hide-btn');
+            } else {
+                shuffleBtn.classList.remove('hide-btn');
+                renderMap(activeSlide.id);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (isLandingActive) return; 
+            if (e.key === 'ArrowRight') showSlide(currentSlide + 1);
+            if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+            if (e.key === 'Escape') {
+                closeLightbox();
+                curatorialOverlay.classList.remove('active');
+            }
+        });
+
+        nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+        shuffleBtn.addEventListener('click', shuffleCurrentMap);
+
+        // --- LIGHTBOX ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeBtn = document.querySelector('.close-btn');
+
+        document.addEventListener('click', function(e) {
+            if (isLandingActive) return; 
+
+            const slot = e.target.closest('.photo-slot');
+            if (slot) {
+                const img = slot.querySelector('img');
+                if (img && img.src) {
+                    const activeSlideId = slides[currentSlide].id;
+                    const currentMapOpacity = mapState[activeSlideId].opacity;
+                    lightboxImg.src = img.src;
+                    lightboxImg.style.opacity = currentMapOpacity;
+                    lightbox.classList.add('active');
+                }
+            }
+        });
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            setTimeout(() => { lightboxImg.src = ''; }, 500); 
+        }
+        closeBtn.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
+
+        // --- LÓGICA DE OPACIDAD DEL VIDEO ---
+        const videoElement = document.getElementById('project-video');
+        let videoPlayed = false;
+
+        videoElement.addEventListener('timeupdate', () => {
+            if (videoPlayed) {
+                videoElement.style.opacity = 0;
+                return;
+            }
+            if (videoElement.duration) {
+                const opacity = 1 - (videoElement.currentTime / videoElement.duration);
+                videoElement.style.opacity = Math.max(0, opacity);
+            }
+        });
+
+        videoElement.addEventListener('ended', () => {
+            videoPlayed = true;
+            videoElement.style.opacity = 0;
+        });
+
+        videoElement.addEventListener('play', () => {
+            if (videoPlayed) {
+                videoElement.style.opacity = 0;
+            }
+        });
+
+        // --- INICIO ---
+        initializeAllMaps();
+        showSlide(0);
+
+    </script>
+</body>
+</html>
