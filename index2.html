@@ -25,9 +25,12 @@
             overflow: hidden;
         }
 
+        /* --- TÍTULO RESPONSIVO --- */
         h1 {
             position: absolute;
             top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 100%;
             margin: 0;
             font-weight: 300;
@@ -36,83 +39,52 @@
             color: var(--map-gold);
             text-align: center;
             z-index: 50;
-            pointer-events: none; 
+            pointer-events: none;
+            font-size: clamp(1.2rem, 4vw, 2.5rem); 
+            line-height: 1.2;
+            max-width: 90%;
         }
 
-        /* --- 2. LANDING PAGE (LA PUERTA) --- */
+        /* --- 2. LANDING PAGE --- */
         #landing-page {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
             transition: opacity 4s ease; 
         }
-
         .door-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 600px;
-            max-height: 800px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative; width: 100%; height: 100%;
+            max-width: 600px; max-height: 800px;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
         }
-
         .door-img {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            max-width: 100%; max-height: 100%; object-fit: contain;
             transition: opacity 4.5s ease-in-out;
         }
-
         #door-closed { z-index: 2; opacity: 1; }
         #door-open { z-index: 1; opacity: 1; }
-
         .door-opening #door-closed { opacity: 0; }
-
         .landing-hidden { opacity: 0; pointer-events: none; }
 
         /* --- 3. BOTÓN Y OVERLAY CURATORIAL --- */
         #about-btn {
-            position: absolute;
-            top: 30px;
-            right: 40px;
-            background: transparent;
-            border: 1px solid var(--map-gold);
-            color: var(--map-gold);
-            padding: 8px 16px;
-            font-family: 'Helvetica Neue', sans-serif;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
+            position: absolute; top: 30px; right: 5%; background: transparent;
+            border: 1px solid var(--map-gold); color: var(--map-gold);
+            padding: 8px 16px; font-family: 'Helvetica Neue', sans-serif;
+            font-size: 0.8rem; letter-spacing: 2px; cursor: pointer;
+            z-index: 100; transition: all 0.3s ease; text-transform: uppercase;
         }
-
         #about-btn:hover { background-color: var(--map-gold); color: #000; }
+
         #curatorial-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.96);
-            z-index: 2500; opacity: 0; visibility: hidden;
+            background-color: rgba(0, 0, 0, 0.96); z-index: 2500;
+            opacity: 0; visibility: hidden;
             transition: opacity 0.5s ease, visibility 0.5s ease;
             display: flex; justify-content: center; align-items: center;
         }
-
         #curatorial-overlay.active { opacity: 1; visibility: visible; }
-
         .curatorial-content {
             width: 90%; max-width: 600px; max-height: 80vh;
             border: 1px solid #333; padding: 40px;
@@ -120,20 +92,16 @@
             color: #ccc; line-height: 1.6; font-weight: 300;
             scrollbar-width: thin; scrollbar-color: var(--map-gold) #222;
         }
-
         .curatorial-content h2 {
             color: var(--map-gold); margin-top: 0; margin-bottom: 30px;
             letter-spacing: 3px; font-size: 1.5rem; text-align: center; text-transform: uppercase;
         }
-
         .curatorial-content p { margin-bottom: 20px; text-align: justify; }
-
         .close-curatorial {
             position: absolute; top: 15px; right: 20px;
-            font-size: 40px; color: var(--map-gold);
-            cursor: pointer; line-height: 1; transition: transform 0.2s;
+            font-size: 40px; color: var(--map-gold); cursor: pointer;
+            line-height: 1; transition: transform 0.2s;
         }
-
         .close-curatorial:hover { transform: scale(1.1); color: #fff; }
 
         /* --- 4. ESTRUCTURA DEL CARRUSEL --- */
@@ -142,26 +110,30 @@
             display: flex; width: 100%; height: 100%;
             transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
-
         .nav-arrow {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: transparent; border: none; color: var(--map-gold);
             font-size: 3rem; cursor: pointer; z-index: 200; padding: 20px;
             opacity: 0.5; transition: opacity 0.3s, transform 0.3s; outline: none;
         }
-
         .nav-arrow:hover { opacity: 1; transform: translateY(-50%) scale(1.2); }
         .prev-arrow { left: 20px; }
         .next-arrow { right: 20px; }
-
         .slide {
             min-width: 100%; height: 100%; position: relative;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
         /* --- 5. ESTILOS DE LOS MAPAS --- */
-        .map-container { position: relative; width: 90vw; max-width: 900px; aspect-ratio: 4724 / 3543; overflow: hidden; }
-        .overlay-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
+        .map-container {
+            position: relative; aspect-ratio: 4724 / 3543;
+            width: 90vw; height: auto; max-height: 65vh; max-width: 1200px;
+            margin: 0 auto; overflow: hidden;
+        }
+        .overlay-map {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 20; pointer-events: none; object-fit: fill;
+        }
         .photo-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
         .photo-slot { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; transition: filter 0.3s ease; }
         .photo-slot:hover { filter: brightness(1.2); z-index: 15; }
@@ -172,7 +144,7 @@
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        /* CONFIGURACIÓN MAPA 1 */
+        /* Polígonos Mapa 1 */
         #map-1 .slot-1 { clip-path: polygon(24.5% 12.3%, 41% 9.3%, 43% 36%, 25.7% 39.2%); }
         #map-1 .slot-2 { clip-path: polygon(41.6% 9.2%, 59.6% 6%, 61.8% 32.8%, 43.6% 36%); }
         #map-1 .slot-3 { clip-path: polygon(60.5% 5.9%, 78% 2.8%, 80.5% 29.5%, 62.7% 32.8%); }
@@ -183,7 +155,7 @@
         #map-1 .slot-8 { clip-path: polygon(28% 68%, 45% 65%, 47% 92%, 30.4% 95%); }
         #map-1 .slot-9 { clip-path: polygon(45.6% 65%, 65.4% 61.5%, 68.6% 88%, 47.6% 92%); }
         #map-1 .slot-10 { clip-path: polygon(66.3% 61.6%, 84.5% 58%, 88.5% 84.5%, 69.4% 88.1%); }
-
+        /* Transformaciones Mapa 1 */
         #map-1 .slot-1 img { transform-origin: 25% 16.3%; transform: scale(0.28) rotate(-7.3deg) !important; }
         #map-1 .slot-2 img { transform-origin: 52% 9.5%; transform: scale(0.28) rotate(-7.3deg) !important; }
         #map-1 .slot-3 img { transform-origin: 76.5% 3.5%; transform: scale(0.28) rotate(-7.3deg) !important; }
@@ -195,7 +167,7 @@
         #map-1 .slot-9 img { transform-origin: 61% 86%; transform: scale(0.28) rotate(-7.3deg) !important; }
         #map-1 .slot-10 img { transform-origin: 89% 79%; transform: scale(0.28) rotate(-7.9deg) !important; }
 
-        /* CONFIGURACIÓN MAPA 2 */
+        /* Polígonos Mapa 2 */
         #map-2 .slot-1 { clip-path: polygon(1.2% 22.5%, 19.6% 19.5%, 22% 42.9%, 5% 45.8%); }
         #map-2 .slot-2 { clip-path: polygon(20.1% 19.3%, 38.3% 16.7%, 40.5% 40.6%, 22.6% 43.2%); }
         #map-2 .slot-3 { clip-path: polygon(38.8% 16.7%, 56% 14.3%, 58% 38%, 41% 40.5%); }
@@ -206,7 +178,7 @@
         #map-2 .slot-8 { clip-path: polygon(41% 41.2%, 58% 38.7%, 61.7% 76%, 44.2% 82%); }
         #map-2 .slot-9 { clip-path: polygon(58.5% 39%, 77.8% 36%, 80.6% 68.4%, 61.8% 75.7%); }
         #map-2 .slot-10 { clip-path: polygon(78.5% 36.1%, 95.5% 33.6%, 98.6% 61.8%, 81.3% 68.2%); }
-
+        /* Transformaciones Mapa 2 */
         #map-2 .slot-1 img { transform-origin: -1% 29.7%; transform: scale(0.25) rotate(-7deg) !important; }
         #map-2 .slot-2 img { transform-origin: 23% 24.5%; transform: scale(0.254) rotate(-6deg) !important; }
         #map-2 .slot-3 img { transform-origin: 47% 20%; transform: scale(0.254) rotate(-6deg) !important; }
@@ -218,33 +190,58 @@
         #map-2 .slot-9 img { transform-origin: 82% 56%; transform: scale(0.37) rotate(-6.5deg) !important; }
         #map-2 .slot-10 img { transform-origin: 107% 47.5%; transform: scale(0.34) rotate(-6deg) !important; }
 
-        /* --- 6. VIDEO --- */
+        /* --- 6. VIDEO (RESPONSIVE) --- */
         .video-container {
-            width: 80vw; max-width: 800px; aspect-ratio: 16 / 9;
+            position: relative; aspect-ratio: 16 / 9;
+            width: 90vw; height: auto; max-height: 65vh; max-width: 1000px;
             border: 1px solid var(--map-gold); box-shadow: 0 0 30px rgba(240, 230, 140, 0.1);
-            background: #000;
+            background: #000; display: flex; justify-content: center; align-items: center; margin: 0 auto;
         }
-
-        /* IMPORTANTE: El video tendrá una transición de opacidad */
-        .video-container video { 
-            width: 100%; height: 100%; object-fit: contain; 
-            transition: opacity 0.5s ease; /* Suavidad al cambiar opacidad */
-        }
-        
+        .video-container video { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.5s ease; }
         .video-caption { position: absolute; bottom: 10%; letter-spacing: 2px; color: #999; width: 100%; text-align: center; margin: 0; }
 
-        /* --- 7. BOTÓN MEZCLAR --- */
+    /* --- 7. NUEVO SLIDE ZOOM + PAN --- */
+        .zoom-container {
+            position: relative; 
+            aspect-ratio: 16 / 9;
+            width: 90vw; height: auto; max-height: 65vh; max-width: 1000px;
+            border: 1px solid var(--map-gold);
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center;
+            background-color: #000;
+            margin: 0 auto;
+            
+            /* Cursores para indicar interactividad */
+            cursor: grab;
+        }
+        
+        /* Cuando se está arrastrando */
+        .zoom-container:active {
+            cursor: grabbing;
+        }
+        
+        #zoom-image {
+            width: 100%; height: 100%; object-fit: cover;
+            transform-origin: center center;
+            will-change: transform, opacity; 
+            /* Quitamos la transición de transform para que el arrastre sea instantáneo y no tenga lag */
+            transition: opacity 0.1s ease-out; 
+            /* Evitamos que el navegador intente arrastrar la imagen como archivo */
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* --- 8. BOTÓN MEZCLAR --- */
         .shuffle-button {
             position: relative; margin-top: 30px; padding: 15px 35px;
             background-color: transparent; color: var(--map-gold); border: 2px solid var(--map-gold);
             font-size: 0.9rem; font-weight: 600; cursor: pointer; text-transform: uppercase;
             letter-spacing: 3px; transition: all 0.3s ease; z-index: 60;
         }
-
         .shuffle-button:hover { background-color: var(--map-gold); color: #000; }
         .hide-btn { visibility: hidden; pointer-events: none; }
 
-        /* --- 8. LIGHTBOX --- */
+        /* --- 9. LIGHTBOX --- */
         .lightbox {
             visibility: hidden; opacity: 0; position: fixed; z-index: 3000;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -252,23 +249,27 @@
             display: flex; justify-content: center; align-items: center;
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-
         .lightbox.active { visibility: visible; opacity: 1; }
         .lightbox-content {
             max-width: 90%; max-height: 90%;
             box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
             border: 1px solid #333; transition: opacity 0.3s ease;
         }
-
         .close-btn {
             position: absolute; top: 20px; right: 30px;
-            font-size: 50px; color: var(--map-gold);
-            cursor: pointer; z-index: 1001;
+            font-size: 50px; color: var(--map-gold); cursor: pointer; z-index: 1001;
         }
 
+        /* --- MEDIA QUERIES (MÓVIL) --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5rem; top: 15px; }
+            #about-btn { top: auto; bottom: 20px; right: 20px; background: rgba(0,0,0,0.8); }
+            .nav-arrow { font-size: 2rem; padding: 10px; }
+            .shuffle-button { margin-bottom: 50px; font-size: 0.8rem; padding: 10px 20px; }
+            .video-caption { bottom: -40px; font-size: 0.8rem; }
+        }
     </style>
 </head>
-
 <body>
 
     <div id="landing-page">
@@ -304,9 +305,11 @@
     </div>
 
     <h1>Las cuadras que caminé</h1>
+
     <div class="carousel-container">
         <button class="nav-arrow prev-arrow" id="prevBtn">&#10094;</button>
         <button class="nav-arrow next-arrow" id="nextBtn">&#10095;</button>
+
         <div class="carousel-track" id="track">
             
             <div class="slide active" id="slide-1" data-type="map">
@@ -354,6 +357,14 @@
                 </div>
                 <p class="video-caption">LA MEMORIA COMO PEATÓN</p>
             </div>
+
+            <div class="slide" id="slide-4" data-type="zoom">
+                <div class="zoom-container">
+                    <img id="zoom-image" src="" alt="Mapa Santiago">
+                </div>
+                <p class="video-caption">TERRITORIO</p>
+            </div>
+
         </div> 
     </div>
 
@@ -365,12 +376,10 @@
     </div>
 
     <script>
-
         // --- CONFIGURACIÓN ---
         const INACTIVITY_LIMIT = 90000; 
 
         // --- BASE DE DATOS DE FOTOS ---
-        // MAPA 1: Primera mitad
         const photosMap1 = [
             './img/02042025-_MG_3926.jpg', './img/02042025-_MG_3928.jpg', './img/02042025-_MG_3937.jpg',
             './img/02042025-_MG_3942.jpg', './img/02042025-_MG_3949.jpg', './img/02042025-_MG_3953.jpg',
@@ -409,7 +418,6 @@
             './img/09042025-_MG_4406.jpg', './img/09042025-_MG_4408.jpg', './img/09042025-_MG_4414.jpg'
         ];
 
-        // MAPA 2: Segunda mitad
         const photosMap2 = [
             './img/09042025-_MG_4424.jpg', './img/09042025-_MG_4433.jpg', './img/09042025-_MG_4435.jpg',
             './img/09042025-_MG_4441.jpg', './img/12082025-_MG_2307.jpg', './img/12082025-_MG_2308.jpg',
@@ -459,6 +467,19 @@
             './img/robertocavieres17.jpg', './img/robertocavieres18.jpg', './img/robertocavieres19.jpg',
             './img/robertocavieres20.jpg', './img/robertocavieres21.jpg', './img/robertocavieres22.jpg'
         ];
+
+// --- IMÁGENES PARA EL ZOOM ---
+        const zoomImages = ['./img/06022026-Mapa_Stgo_1.jpg', './img/06022026-Mapa_Stgo_2.jpg'];
+        
+        // Variables de Estado del Zoom/Pan
+        let zoomLevel = 1;
+        const ZOOM_SPEED = 0.1;
+        const MAX_ZOOM = 20;
+        
+        // Variables para el Arrastre (Panning)
+        let isDragging = false;
+        let startX = 0, startY = 0;
+        let translateX = 0, translateY = 0;
 
         // --- VARIABLES GLOBALES ---
         const slides = document.querySelectorAll('.slide');
@@ -543,7 +564,7 @@
             inactivityTimer = setTimeout(exitExperience, INACTIVITY_LIMIT);
         }
 
-        ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'].forEach(evt => 
+        ['click', 'mousemove', 'keydown', 'scroll', 'touchstart', 'wheel'].forEach(evt => 
             document.addEventListener(evt, resetInactivityTimer)
         );
 
@@ -576,10 +597,16 @@
         }
 
         function initializeAllMaps() {
+            // Mapas normales
             mapState['slide-1'].currentPhotos = shuffleArray(photosMap1);
             renderMap('slide-1');
             mapState['slide-2'].currentPhotos = shuffleArray(photosMap2);
             renderMap('slide-2');
+
+            // Slide 4: Imagen Aleatoria
+            const zoomImg = document.getElementById('zoom-image');
+            const randomZoomSrc = zoomImages[Math.floor(Math.random() * zoomImages.length)];
+            zoomImg.src = randomZoomSrc;
         }
 
         function renderMap(slideId) {
@@ -634,7 +661,8 @@
             const activeSlide = slides[currentSlide];
             activeSlide.classList.add('active');
 
-            if (activeSlide.dataset.type === 'video') {
+            // Ocultar botón mezclar si es video o zoom
+            if (activeSlide.dataset.type === 'video' || activeSlide.dataset.type === 'zoom') {
                 shuffleBtn.classList.add('hide-btn');
             } else {
                 shuffleBtn.classList.remove('hide-btn');
@@ -684,33 +712,106 @@
         closeBtn.addEventListener('click', closeLightbox);
         lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
 
+        // ============================================
+        // LÓGICA DE ZOOM Y PANNING (ARRASTRAR)
+        // ============================================
+        const zoomContainer = document.querySelector('.zoom-container');
+        const zoomImage = document.getElementById('zoom-image');
+
+        function updateZoomVisuals() {
+            // Aplicamos tanto la traslación (mover) como la escala (zoom)
+            zoomImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`;
+            
+            // --- AJUSTE DE VELOCIDAD DE DESVANECIMIENTO ---
+            // Este número define en qué nivel de zoom la imagen ya será totalmente negra.
+            // Antes estaba en (MAX_ZOOM - 1), o sea 19.
+            // Si pones 5, al llegar a zoom 6 ya estará negra.
+            // Si pones 10, al llegar a zoom 11 ya estará negra.
+            const fadeThreshold = 4; 
+            
+            const opacity = 1 - ((zoomLevel - 1) / fadeThreshold);
+            
+            // Math.max(0, ...) asegura que no nos den números negativos
+            zoomImage.style.opacity = Math.max(0, opacity);
+        }
+
+        // 1. Zoom con la rueda
+        zoomContainer.addEventListener('wheel', (e) => {
+            if (slides[currentSlide].id !== 'slide-4') return;
+            e.preventDefault(); 
+            
+            if (e.deltaY < 0) {
+                zoomLevel += ZOOM_SPEED * zoomLevel; // In
+            } else {
+                zoomLevel -= ZOOM_SPEED * zoomLevel; // Out
+            }
+            
+            // Límites
+            zoomLevel = Math.max(1, Math.min(zoomLevel, MAX_ZOOM));
+            
+            // Si volvemos al zoom original, reseteamos la posición (centrar)
+            if (zoomLevel <= 1) {
+                zoomLevel = 1;
+                translateX = 0;
+                translateY = 0;
+            }
+            
+            updateZoomVisuals();
+        });
+
+        // 2. Iniciar Arrastre (MouseDown)
+        zoomContainer.addEventListener('mousedown', (e) => {
+            // Solo permitir arrastre si hay zoom (opcional, pero se siente mejor)
+            if (slides[currentSlide].id !== 'slide-4') return;
+            
+            isDragging = true;
+            // Guardamos dónde empezamos a arrastrar, ajustado por la posición actual
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            zoomContainer.style.cursor = 'grabbing';
+        });
+
+        // 3. Terminar Arrastre (MouseUp / Leave)
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                zoomContainer.style.cursor = 'grab';
+            }
+        });
+
+        // 4. Mover (MouseMove)
+        zoomContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            // Nueva posición = Posición actual del mouse - Punto de inicio relativo
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            
+            updateZoomVisuals();
+        });
+
+
         // --- LÓGICA DE OPACIDAD DEL VIDEO ---
         const videoElement = document.getElementById('project-video');
         let videoPlayed = false;
 
-        // Al moverse el tiempo, calculamos la opacidad inversa
         videoElement.addEventListener('timeupdate', () => {
             if (videoPlayed) {
                 videoElement.style.opacity = 0;
                 return;
             }
-            
-            // Efecto: A medida que avanza, se vuelve transparente
             if (videoElement.duration) {
-                // Opacidad = 1 (inicio) a 0 (fin)
                 const opacity = 1 - (videoElement.currentTime / videoElement.duration);
-                // Nos aseguramos de que no baje de 0
                 videoElement.style.opacity = Math.max(0, opacity);
             }
         });
 
-        // Cuando termina, marcamos como "consumido" y forzamos negro
         videoElement.addEventListener('ended', () => {
             videoPlayed = true;
             videoElement.style.opacity = 0;
         });
 
-        // Si intenta darle play de nuevo, se mantiene negro
         videoElement.addEventListener('play', () => {
             if (videoPlayed) {
                 videoElement.style.opacity = 0;
